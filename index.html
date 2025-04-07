@@ -2,42 +2,57 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Профиль</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="icon.png" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="icon.png" type="image/x-icon">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Arial', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             overflow: hidden;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
             color: white;
+            background: #000;
+        }
+
+        #video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
         }
 
         #video-bg {
-            position: fixed;
-            right: 0;
-            bottom: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             min-width: 100%;
             min-height: 100%;
-            z-index: -1;
+            width: auto;
+            height: auto;
+            object-fit: cover;
         }
 
         .profile-card {
             background: rgba(0, 0, 0, 0.7);
             border-radius: 20px;
-            padding: 30px;
-            width: 90%;
+            padding: 25px;
+            width: calc(100% - 40px);
             max-width: 600px;
             text-align: center;
             position: relative;
@@ -46,6 +61,9 @@
                         0 0 80px rgba(0, 255, 255, 0.2);
             border: 2px solid rgba(0, 255, 255, 0.5);
             animation: neonGlow 2s infinite alternate;
+            margin: 20px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         }
 
         @keyframes neonGlow {
@@ -64,46 +82,53 @@
         }
 
         .avatar {
-            width: 150px;
-            height: 150px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid rgba(0, 255, 255, 0.7);
-            margin: 0 auto 20px;
+            margin: 0 auto 15px;
             display: block;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
         }
 
         h1 {
             margin-bottom: 10px;
-            font-size: 2rem;
+            font-size: clamp(1.5rem, 5vw, 2rem);
             text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+            word-break: break-word;
         }
 
         .bio {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             line-height: 1.6;
-            font-size: 1.1rem;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            text-align: left;
+            overflow-wrap: break-word;
+        }
+
+        .bio code, .bio a {
+            word-break: break-all;
         }
 
         .social-links {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 15px;
         }
 
         .social-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             background: rgba(0, 255, 255, 0.2);
             color: white;
-            font-size: 24px;
+            font-size: 20px;
             text-decoration: none;
             transition: all 0.3s ease;
             border: 1px solid rgba(0, 255, 255, 0.5);
@@ -117,54 +142,326 @@
 
         .visitor-counter {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 15px;
+            right: 15px;
             background: rgba(0, 0, 0, 0.7);
             border-radius: 50px;
-            padding: 10px 20px;
+            padding: 8px 15px;
             display: flex;
             align-items: center;
             border: 1px solid rgba(0, 255, 255, 0.5);
             box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            font-size: 14px;
         }
 
         .counter-icon {
-            margin-right: 10px;
+            margin-right: 8px;
             color: cyan;
         }
 
         .counter-number {
             font-weight: bold;
-            font-size: 1.2rem;
             color: white;
         }
 
-        @media (max-width: 768px) {
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .modal-content {
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            width: calc(100% - 40px);
+            max-width: 500px;
+            position: relative;
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            margin: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            opacity: 1;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 22px;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            z-index: 1;
+        }
+
+        .close-btn:hover {
+            color: cyan;
+        }
+
+        .modal-title {
+            margin-bottom: 15px;
+            text-align: center;
+            color: cyan;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            font-size: clamp(1.2rem, 5vw, 1.5rem);
+        }
+
+        .modal-text {
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 50px;
+            background: rgba(0, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: clamp(0.8rem, 3vw, 1rem);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+        }
+
+        .action-btn i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .action-btn:hover {
+            background: rgba(0, 255, 255, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes rotateIn {
+            from { transform: rotate(-10deg) scale(0.8); opacity: 0; }
+            to { transform: rotate(0) scale(1); opacity: 1; }
+        }
+
+        .modal.slide .modal-content {
+            animation: slideIn 0.5s ease forwards;
+        }
+
+        .modal.fade .modal-content {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .modal.rotate .modal-content {
+            animation: rotateIn 0.5s ease forwards;
+        }
+
+        .modal.closing .modal-content {
+            animation: fadeIn 0.3s ease reverse forwards;
+        }
+
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+            
+            #video-container {
+                height: -webkit-fill-available;
+            }
+        }
+
+        /* Фикс для Samsung Internet */
+        @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+            #video-bg {
+                width: 100%;
+                height: 100%;
+            }
+        }
+
+        @-moz-document url-prefix() {
             .profile-card {
-                padding: 20px;
-                width: 95%;
+                background: rgba(0, 0, 0, 0.85);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .profile-card {
+                padding: 15px;
             }
             
             .avatar {
-                width: 120px;
-                height: 120px;
-            }
-            
-            h1 {
-                font-size: 1.5rem;
-            }
-            
-            .bio {
-                font-size: 1rem;
+                width: 100px;
+                height: 100px;
             }
             
             .social-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 20px;
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            
+            .action-btn {
+                min-width: 100px;
+                padding: 6px 12px;
+            }
+            
+            .visitor-counter {
+                bottom: 10px;
+                right: 10px;
+                padding: 6px 12px;
+            }
+        }
+
+        @media (orientation: portrait) and (max-height: 700px) {
+            .profile-card {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            .profile-card {
+                max-height: 90vh;
+                overflow-y: auto;
+                padding: 15px;
+            }
+            
+            .avatar {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 10px;
+            }
+            
+            h1 {
+                font-size: 1.2rem;
+                margin-bottom: 5px;
+            }
+            
+            .bio {
+                font-size: 0.8rem;
+                margin-bottom: 10px;
             }
         }
     </style>
+</head>
+<body>
+    <video autoplay muted loop id="video-bg" playsinline>
+        <source src="video1.mp4" type="video/mp4" id="video-source">
+    </video>
+    
+    <div class="profile-card">
+        <img src="photo.jpg" alt="Моя аватарка" class="avatar">
+        <h1>ᴧᴇᴧиᴋ</h1>
+        <div class="bio" style="white-space: pre-wrap; text-align: left;">
+            ID: <code>615061902</code>  
+            USERNAME: @iammfl                
+        </div>       
+        <div class="social-links">
+            <a href="https://t.me/iammfl" class="social-btn" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
+            <a href="https://github.com/loliksudoc" class="social-btn" title="GitHub"><i class="fab fa-github"></i></a>
+            <a href="https://wa.me/77786926590" class="social-btn" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://t.me/send?start=IVcbws84XJzZ" class="social-btn" title="Tether (USDT)"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" style="width: 24px; height: 24px; object-fit: contain;" alt="USDT"></a>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn" onclick="openModal('modal1', 'slide')"><i class="fas fa-university" style="margin-right: 8px;"></i>Карты</button>
+            <button class="action-btn" onclick="openModal('modal2', 'slide')"><i class="far fa-clock" style="margin-right: 8px;"></i>Время работы</button>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+            <button class="action-btn" onclick="openModal('modal3', 'slide')"><i class="bi bi-info-circle" style="margin-right: 8px;"></i>Связь</button>
+        </div>
+    </div>
+
+    <div class="visitor-counter">
+        <span class="counter-icon">👁️</span>
+        <span class="counter-number" id="visitor-count">0</span>
+    </div>
+
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal1')">&times;</span>
+            <h2 class="modal-title">Мои Банки</h2>
+            <div class="modal-text">
+                <p>я имею всего 3 доступа оплаты:</p>
+                <ul>
+                    <li>KASPI: <code>4400430368612484</code></li>
+                    <li>YouMoney: <code>5599002070934957</code></li>
+                    <li>CryptoBot: <i>по кнопке с лого USDT</i></li>
+                </ul>
+                <p>остальные фейки.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal2')">&times;</span>
+            <h2 class="modal-title">Актив</h2>
+            <div class="modal-text">
+                <ul>
+                    <li>Active: 7–8 hours on weekdays / 3–4 hours on holidays </li>
+                    <li>Иногда бывают исключение</li>
+                    <li>если я общаюсь не значит что я активный и работаю.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('modal3')">&times;</span>
+            <h2 class="modal-title">Связь</h2>
+            <div class="modal-text">
+                <p>связаться можно со мной разными способами</p>
+                <p>ну вот основные решения:</p>
+                <ul>
+                    <li>Кнопка с лого Ватсап(если хотите написать на ватсап)</li>
+                    <li>Кнопка с лого Телеграмм(если хотите написать через Телеграмм)</li>
+                    <li>Оригинальный айди - 615061902</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <script>
         function checkDevice() {
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -186,50 +483,40 @@
             localStorage.setItem('visitorCount', count);
             document.getElementById('visitor-count').textContent = count;
         }
+
+        function openModal(modalId, animationType) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'flex';
+            modal.classList.add(animationType);
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('closing');
+            modal.classList.remove('active');
+            
+            setTimeout(() => {
+                modal.classList.remove('closing');
+                modal.style.display = 'none';
+                modal.classList.remove('slide', 'fade', 'rotate');
+            }, 300);
+        }
     
         window.onload = function () {
             checkDevice();
             updateVisitorCounter();
+
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeModal(this.id);
+                    }
+                });
+            });
         };
     </script>
-    
-</head>
-<body>
-    <video autoplay muted loop id="video-bg" playsinline>
-        <source src="video1.mp4" type="video/mp4" id="video-source">
-    </video>
-    
-
-    <div class="profile-card">
-        <img src="photo.jpg" alt="Моя аватарка" class="avatar">
-        <h1>ᴧᴇᴧиᴋ</h1>
-        <div class="bio" style="white-space: pre-wrap; text-align: left;">
-            ID: <code>615061902</code>  
-            USERNAME: @iammfl  
-              
-            Active: 7–8 hours on weekdays / 3–4 hours on holidays  
-            Defs: I don't have defs  
-              
-            Wallets:  
-            - YouMoney: <code>5599002070934957</code>  
-            - KASPI: <code>4400430368612484</code>  
-            - CB: <a href="https://t.me/send?start=IVcbws84XJzZ">счет</a>
-            </div>
-            
-        <div class="social-links">
-            <div class="social-links">
-                <a href="https://t.me/iammfl" class="social-btn" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
-                <a href="https://github.com/loliksudoc" class="social-btn" title="GitHub"><i class="fab fa-github"></i></a>
-                <a href="https://wa.me/77786926590" class="social-btn" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-            </div>
-            
-        </div>
-    </div>
-
-    <div class="visitor-counter">
-        <span class="counter-icon">👁️</span>
-        <span class="counter-number" id="visitor-count">0</span>
-    </div>
-
 </body>
 </html>
