@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mimic | adapter</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      color: #fff;
+      background: #000;
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .cyber-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      overflow: hidden;
+    }
+
+    #bg-video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      transform: translate(-50%, -50%);
+      object-fit: cover;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: -1;
+    }
+
+    .cyber-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .center-box {
+      background: rgba(0, 0, 0, 0.65);
+      padding: 40px;
+      border-radius: 20px;
+      border: 2px solid #ff073a;
+      box-shadow: 0 0 20px #0ff, inset 0 0 20px rgba(0, 255, 255, 0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 450px;
+      backdrop-filter: blur(5px);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .center-box::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      border: 2px solid #0ff;
+      border-radius: 25px;
+      opacity: 0.7;
+      z-index: -1;
+      animation: pulse 2s infinite;
+    }
+
+    .avatar-container {
+      position: relative;
+      margin-bottom: 25px;
+    }
+
+    .avatar {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      border: 3px solid #0ff;
+      box-shadow: 0 0 25px #0ff;
+      object-fit: cover;
+      transition: all 0.3s ease;
+    }
+
+    .avatar:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 35px #0ff;
+    }
+
+    .username {
+      margin-top: 15px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #0ff;
+      text-shadow: 0 0 10px #0ff;
+      letter-spacing: 2px;
+    }
+
+    .tagline {
+      font-size: 16px;
+      color: #ff073a;
+      margin-bottom: 25px;
+      font-weight: 500;
+    }
+
+    .audio-player {
+      width: 100%;
+      margin-bottom: 25px;
+      border-radius: 30px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid #0ff;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    }
+
+    .audio-player::-webkit-media-controls-panel {
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    .btn-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 25px;
+      border: 2px solid;
+      border-radius: 30px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      flex: 1;
+      max-width: 200px;
+      backdrop-filter: blur(5px);
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .btn i {
+      margin-right: 10px;
+      font-size: 20px;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px;
+    }
+
+    .whatsapp {
+      border-color: #25D366;
+      color: #25D366;
+      box-shadow: 0 0 10px rgba(37, 211, 102, 0.3);
+    }
+
+    .whatsapp:hover {
+      background: #25D366;
+      color: #000;
+      box-shadow: 0 0 20px #25D366;
+    }
+
+    .telegram {
+      border-color: #0088cc;
+      color: #0088cc;
+      box-shadow: 0 0 10px rgba(0, 136, 204, 0.3);
+    }
+
+    .telegram:hover {
+      background: #0088cc;
+      color: #000;
+      box-shadow: 0 0 20px #0088cc;
+    }
+
+    .github {
+      border-color: #fff;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .github:hover {
+      background: #fff;
+      color: #000;
+      box-shadow: 0 0 20px #fff;
+    }
+
+    .portfolio {
+      border-color: #f0f;
+      color: #f0f;
+      box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    }
+
+    .portfolio:hover {
+      background: #f0f;
+      color: #000;
+      box-shadow: 0 0 20px #f0f;
+    }
+
+    .crypto {
+      border-color: #ff0;
+      color: #ff0;
+      box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+    }
+
+    .crypto:hover {
+      background: #ff0;
+      color: #000;
+      box-shadow: 0 0 20px #ff0;
+    }
+
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+      color: #0ff;
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.7; }
+      50% { opacity: 0.3; }
+      100% { opacity: 0.7; }
+    }
+
+    @media (max-width: 768px) {
+      .center-box {
+        padding: 30px 20px;
+        max-width: 90%;
+        box-shadow: 0 0 15px #0ff;
+      }
+      
+      .avatar {
+        width: 140px;
+        height: 140px;
+      }
+      
+      .username {
+        font-size: 24px;
+      }
+      
+      .btn-row {
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .btn {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .center-box {
+        padding: 25px 15px;
+      }
+      
+      .avatar {
+        width: 120px;
+        height: 120px;
+      }
+      
+      .username {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="cyber-bg">
+    <video id="bg-video" autoplay muted loop playsinline>
+      <source id="video-source" src="" type="video/mp4">
+    </video>
+  </div>
+  
+  <div class="overlay"></div>
+  <div class="cyber-grid"></div>
+
+  <div class="container">
+    <div class="center-box">
+      <div class="avatar-container">
+        <img src="avatar.png" alt="Avatar" class="avatar"/>
+        <h1 class="username">MIMIC | ADAPTER</h1>
+        <p class="tagline">Вайб-Разработчик</p>
+      </div>
+
+      <audio class="audio-player" controls>
+        <source src="music.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио элемент.
+      </audio>
+
+      <div class="btn-container">
+        <div class="btn-row">
+          <a href="https://wa.me/+77786926590" target="_blank" class="btn whatsapp">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+          </a>
+          <a href="https://t.me/Mimicovv" target="_blank" class="btn telegram">
+            <i class="fab fa-telegram"></i> Telegram
+          </a>
+        </div>
+        
+        <div class="btn-row">
+          <a href="https://github.com/loliksudoc" target="_blank" class="btn github">
+            <i class="fab fa-github"></i> GitHub
+          </a>
+          <a href="https://ваш-портфолио.сайт" target="_blank" class="btn portfolio">
+            <i class="fas fa-briefcase"></i> Portfolio
+          </a>
+        </div>
+        
+        <div class="btn-row">
+          <a href="https://t.me/send?start=IVKED5WTW18N" target="_blank" class="btn crypto">
+            <i class="fas fa-robot"></i> CryptoBot
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>© 2023 Mimic | Adapter. Все права в метавселенной защищены</p>
+    </div>
+  </div>
+
+  <script>
+    function setVideo() {
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+                       .test(navigator.userAgent);
+      const source = document.getElementById('video-source');
+      source.src = isMobile ? 'video_phone.mp4' : 'video_pc.mp4';
+
+      const video = document.getElementById('bg-video');
+      video.load();
+
+      const playPromise = video.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log('Автовоспроизведение заблокировано:', error);
+          video.muted = true;
+          video.play();
+        });
+      }
+    }
+
+    window.addEventListener('load', setVideo);
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      const username = document.querySelector('.username');
+      const originalText = username.textContent;
+      username.textContent = '';
+      
+      let i = 0;
+      const typeWriter = () => {
+        if (i < originalText.length) {
+          username.textContent += originalText.charAt(i);
+          i++;
+          setTimeout(typeWriter, 100);
+        }
+      };
+      
+      typeWriter();
+    });
+  </script>
+</body>
+</html>
